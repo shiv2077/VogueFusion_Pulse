@@ -1,8 +1,17 @@
-numpy
-scikit-learn
-matplotlib
-scipy
-opencv-python
-streamlit
-icrawler
-Pillow
+# Runtime (voguefusion env, Python 3.11). Versions as installed and tested on 2026-11-11.
+fastapi==0.162.4
+uvicorn[standard]==0.54.0
+python-multipart==0.0.33
+httpx==0.28.1
+websockets==17.4
+pyyaml==6.0.3
+numpy==2.4.6
+scipy==1.17.1
+scikit-learn==1.9.1
+pillow==13.0.0
+# Tests and lint
+pytest==9.2.0
+ruff==0.17.4
+colour-science==0.4.7
+# Browser check of the web app (scripts/ui_check.py); uses the system Chrome.
+playwright==1.65.2

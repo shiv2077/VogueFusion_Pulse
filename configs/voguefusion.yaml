@@ -1,0 +1,160 @@
+# Every tunable value for the VogueFusion services. Values marked ASSUMED are
+# not measured; docs/ARCHITECTURE.md lists each one under open measurements.
+
+data_dir_env: VOGUEFUSION_DATA
+data_dir_default: ~/voguefusion-data
+
+api:
+  host: 127.0.0.1
+  port: 8000
+
+ui:
+  # The web app (static HTML/CSS/JS), served by the API at /.
+  web_dir: ui/web
+
+comfyui:
+  url: http://127.0.0.1:8188
+  install_dir: ~/ComfyUI
+  workflows_dir: comfyui/workflows
+  models_manifest: comfyui/models.json
+  http_timeout_s: 30
+  # Upper bound on one generation inside ComfyUI, including a cold model load.
+  job_timeout_s: 900
+  # Cap on how long the GPU worker waits for any websocket message before it
+  # treats ComfyUI as hung.
+  ws_idle_timeout_s: 240
+
+queue:
+  db_file: jobs.sqlite3
+  sqlite_busy_timeout_ms: 5000
+  poll_interval_s: 0.5
+  # Workers renew their lease at least this often while a job runs. Must be
+  # well under every kind's lease_s.
+  heartbeat_s: 10
+  kinds:
+    generate:
+      # Depth counts queued + running jobs. 8 jobs at ~60-90 s each is a
+      # 10+ minute backlog on one GPU; past that, rejecting is kinder than
+      # accepting.
+      max_depth: 8
+      max_attempts: 3
+      lease_s: 300
+      retry_backoff_s: 5
+      workers: 1
+      # Used for Retry-After until enough jobs have finished to measure it.
+      default_service_s: 60
+    cost:
+      max_depth: 32
+      max_attempts: 3
+      lease_s: 120
+      retry_backoff_s: 1
+      workers: 1
+      default_service_s: 5
+  retry_after:
+    min_s: 1
+    max_s: 900
+  # Number of most recent finished jobs used for latency percentiles and the
+  # measured service time behind Retry-After.
+  metrics_window: 200
+
+limits:
+  prompt_max_chars: 500
+  negative_max_chars: 2000
+  upload_max_bytes: 10485760
+  image_min_side: 64
+  image_max_side: 4096
+  references_min: 1
+  references_max: 4
+  batch_max: 3
+  seed_max: 18446744073709551615
+
+generate:
+  default_workflow: v1
+  workflows:
+    v1:
+      file: v1.api.json
+      description: SDXL Lightning + IP-Adapter (4 references), no LoRA
+    v2:
+      file: v2.api.json
+      description: v1 + VogueFusion LoRA, batch 3, long negative prompt
+
+costing:
+  catalogue_file: trend_and_cost_prediction/data/dye_detail.json
+  currency: INR
+  # Grams of dye per kg of fabric that unit Kubelka-Munk concentration
+  # represents. ASSUMED (OM-1): 20 g/kg (2% on weight of fabric) is a common medium
+  # depth for reactive dyes. The catalogue's swatch colours were not measured
+  # at a known depth, so this is the largest single uncertainty in the quote.
+  reference_depth_g_per_kg: 20.0
+  delta_e_tolerance: 2.0
+  # ASSUMED (OM-1): plausible reflectance range for a dyed textile swatch. The
+  # catalogue colours are CSS-style placeholders with channels at exactly 0
+  # and 255; see costing/catalogue.py.
+  swatch_reflectance_floor: 0.03
+  swatch_reflectance_ceiling: 0.95
+  extraction:
+    n_colours: 5
+    max_side_px: 256
+    kmeans_n_init: 4
+    kmeans_seed: 0
+  substrates:
+    white: [1.0, 1.0, 1.0]
+    # ASSUMED (OM-3): unbleached cotton, slightly warm off-white.
+    cotton: [0.92, 0.89, 0.82]
+  default_substrate: white
+  fabric:
+    default_gsm: 70
+    gsm_options: [70, 100, 120]
+    # Standard saree: 5.5 m long. ASSUMED (OM-6) width 1.1 m (44 inch loom width).
+    default_length_m: 5.5
+    default_width_m: 1.1
+  solver:
+    version: enum-km-de2000-1
+    max_dyes: 3
+    max_concentration: 3.0
+    min_concentration: 0.01
+    # SLSQP refinement of the best few screened dye sets, by cost and by delta E.
+    polish_top_k: 3
+    polish_maxiter: 200
+    polish_ftol: 1.0e-9
+    # Polish aims this far inside the tolerance so float error cannot push
+    # the answer just outside it.
+    polish_margin: 1.0e-4
+
+trends:
+  # Output of scripts/build_trends.py, under the data dir.
+  store_dir: trends
+  captions_dir: dataset/training_data
+  top_n: 12
+  # Seasonal input only: how many latest seasons count as "recent", and the
+  # minimum number of items a keyword must appear in to be scored.
+  recent_seasons: 2
+  min_support: 5
+  # Auto-tagger output that does not describe a textile print: misfires on
+  # motifs (pokemon, girls, calendar), and tags that say nothing about the
+  # design (no humans, simple background, watermark).
+  exclude_tags:
+    - no humans
+    - simple background
+    - pokemon (creature)
+    - multiple girls
+    - 6+girls
+    - 1girl
+    - calendar (medium)
+    - text focus
+    - blue eyes
+    - closed eyes
+    - green eyes
+    - everyone
+    - cover
+    - card
+    - watermark
+    - flame-tipped tail
+    - horns
+  caveats:
+    captions:
+      - Built from the 82 LoRA training captions, which have no dates; these are domain keywords, not trends.
+      - Captions are auto-tagger output; misfiring tags are excluded by a fixed list in the config.
+    seasonal:
+      - A season label is the season named in the search query or the pin date, not when the design trended (ADR-009).
+      - Fall and Autumn are merged into one season.

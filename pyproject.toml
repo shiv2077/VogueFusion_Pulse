@@ -1,0 +1,23 @@
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["trend_and_cost_prediction"]
+
+[tool.ruff.format]
+# Hand-formatted by the owner; lint still applies to them.
+exclude = [
+    "src/costing/color/perceptual.py",
+    "tests/color_science/test_delta_e2000.py",
+    "tests/color_science/test_lab_conversion.py",
+    "tests/color_science/test_subtractive_mixing.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["voguefusion", "costing", "client", "widgets", "tests"]
