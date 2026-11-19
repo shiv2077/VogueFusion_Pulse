@@ -1,0 +1,234 @@
+{
+  "10": {
+    "class_type": "RepeatLatentBatch",
+    "inputs": {
+      "amount": 1,
+      "samples": [
+        "5",
+        0
+      ]
+    }
+  },
+  "11": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "IMG-20241110-WA0003.jpg",
+      "upload": "image"
+    }
+  },
+  "12": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "IMG-20241110-WA0001.jpg",
+      "upload": "image"
+    }
+  },
+  "13": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "IMG-20241110-WA0013.jpg",
+      "upload": "image"
+    }
+  },
+  "14": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "IMG-20241116-WA0022.jpg",
+      "upload": "image"
+    }
+  },
+  "20": {
+    "class_type": "IPAdapterUnifiedLoader",
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "preset": "PLUS (high strength)"
+    }
+  },
+  "21": {
+    "class_type": "IPAdapterCombineEmbeds",
+    "inputs": {
+      "embed1": [
+        "23",
+        0
+      ],
+      "embed2": [
+        "25",
+        0
+      ],
+      "embed3": [
+        "27",
+        0
+      ],
+      "embed4": [
+        "29",
+        0
+      ],
+      "method": "concat"
+    }
+  },
+  "22": {
+    "class_type": "IPAdapterEmbeds",
+    "inputs": {
+      "embeds_scaling": "V only",
+      "end_at": 1.0,
+      "ipadapter": [
+        "20",
+        1
+      ],
+      "model": [
+        "20",
+        0
+      ],
+      "pos_embed": [
+        "21",
+        0
+      ],
+      "start_at": 0.0,
+      "weight": 0.8,
+      "weight_type": "linear"
+    }
+  },
+  "23": {
+    "class_type": "IPAdapterEncoder",
+    "inputs": {
+      "image": [
+        "12",
+        0
+      ],
+      "ipadapter": [
+        "20",
+        1
+      ],
+      "weight": 0.75
+    }
+  },
+  "25": {
+    "class_type": "IPAdapterEncoder",
+    "inputs": {
+      "image": [
+        "13",
+        0
+      ],
+      "ipadapter": [
+        "20",
+        1
+      ],
+      "weight": 0.9
+    }
+  },
+  "27": {
+    "class_type": "IPAdapterEncoder",
+    "inputs": {
+      "image": [
+        "11",
+        0
+      ],
+      "ipadapter": [
+        "20",
+        1
+      ],
+      "weight": 0.8
+    }
+  },
+  "29": {
+    "class_type": "IPAdapterEncoder",
+    "inputs": {
+      "image": [
+        "14",
+        0
+      ],
+      "ipadapter": [
+        "20",
+        1
+      ],
+      "weight": 0.6
+    }
+  },
+  "3": {
+    "class_type": "KSampler",
+    "inputs": {
+      "cfg": 2.0,
+      "denoise": 1.0,
+      "latent_image": [
+        "10",
+        0
+      ],
+      "model": [
+        "22",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "sampler_name": "lcm",
+      "scheduler": "normal",
+      "seed": 19995199568069,
+      "steps": 10
+    }
+  },
+  "4": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "dreamshaperXL_sfwLightningDPMSDE.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "batch_size": 1,
+      "height": 1080,
+      "width": 768
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "4",
+        1
+      ],
+      "text": "abstract, tie dye, modern art, colorful"
+    }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "4",
+        1
+      ],
+      "text": "human"
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "8",
+        0
+      ]
+    }
+  }
+}
