@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 740" width="1440" height="740" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif">
+  <title>VogueFusion system design</title>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" fill="#475569"/>
+    </marker>
+    <style>
+      .card { fill: #ffffff; stroke: #e2e8f0; }
+      .box { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.2; }
+      .group { fill: #f5f3ff; stroke: #c4b5fd; stroke-dasharray: 6 5; stroke-width: 1.2; }
+      .t { font-size: 17px; font-weight: 600; fill: #0f172a; }
+      .s { font-size: 13px; fill: #475569; }
+      .g { font-size: 13px; font-weight: 600; fill: #6d28d9; letter-spacing: .04em; }
+      .e { stroke: #475569; stroke-width: 1.6; fill: none; }
+      .d { stroke: #94a3b8; stroke-width: 1.6; fill: none; stroke-dasharray: 5 5; }
+      .l { font-size: 12.5px; fill: #334155; }
+      .tag { font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+    </style>
+  </defs>
+
+  <rect class="card" x="0.5" y="0.5" width="1439" height="739" rx="16"/>
+  <text x="40" y="52" font-size="22" font-weight="700" fill="#0f172a">VogueFusion: system design</text>
+  <text x="40" y="78" class="s">Asynchronous jobs: the API never blocks on the GPU. Workers lease jobs from a durable queue; images are stored by content hash.</text>
+
+  <!-- Client -->
+  <rect class="box" x="40" y="285" width="210" height="150" rx="10"/>
+  <rect x="40" y="285" width="6" height="150" rx="3" fill="#2563eb"/>
+  <text x="62" y="318" class="t">Web app</text>
+  <text x="62" y="344" class="s">Generate · Colors</text>
+  <text x="62" y="364" class="s">Dye Recipes · Cost</text>
+  <text x="62" y="384" class="s">Status</text>
+  <text x="62" y="414" class="s">submits jobs, polls status</text>
+
+  <!-- API -->
+  <rect class="box" x="320" y="245" width="250" height="230" rx="10"/>
+  <rect x="320" y="245" width="6" height="230" rx="3" fill="#2563eb"/>
+  <text x="342" y="278" class="t">API service</text>
+  <text x="342" y="300" class="s">stateless</text>
+  <text x="342" y="332" class="s">validates and normalises input</text>
+  <text x="342" y="354" class="s">idempotency keys, request dedupe</text>
+  <text x="342" y="376" class="s">backpressure: 429 + Retry-After</text>
+  <text x="342" y="398" class="s">job status and queue metrics</text>
+  <text x="342" y="420" class="s">serves the app and images</text>
+
+  <!-- Job store -->
+  <rect class="box" x="650" y="150" width="240" height="115" rx="10"/>
+  <rect x="650" y="150" width="6" height="115" rx="3" fill="#0d9488"/>
+  <text x="672" y="183" class="t">Job store</text>
+  <text x="672" y="205" class="s">SQLite (WAL), durable queue</text>
+  <text x="672" y="227" class="s">states, leases, retries,</text>
+  <text x="672" y="249" class="s">fencing by lease owner</text>
+
+  <!-- Blob store -->
+  <rect class="box" x="650" y="455" width="240" height="115" rx="10"/>
+  <rect x="650" y="455" width="6" height="115" rx="3" fill="#0d9488"/>
+  <text x="672" y="488" class="t">Blob store</text>
+  <text x="672" y="510" class="s">content-addressed (SHA-256)</text>
+  <text x="672" y="532" class="s">references, generated designs;</text>
+  <text x="672" y="554" class="s">atomic write-then-rename</text>
+
+  <!-- Workers -->
+  <rect class="group" x="970" y="120" width="250" height="480" rx="12"/>
+  <text x="988" y="146" class="g">WORKERS · ONE POOL PER RESOURCE</text>
+
+  <rect class="box" x="990" y="165" width="210" height="140" rx="10"/>
+  <rect x="990" y="165" width="6" height="140" rx="3" fill="#7c3aed"/>
+  <text x="1012" y="198" class="t">GPU worker</text>
+  <text x="1012" y="222" class="s">binds the request into</text>
+  <text x="1012" y="242" class="s">a saved workflow graph,</text>
+  <text x="1012" y="262" class="s">renews its lease on every</text>
+  <text x="1012" y="282" class="s">progress event</text>
+
+  <rect class="box" x="990" y="425" width="210" height="150" rx="10"/>
+  <rect x="990" y="425" width="6" height="150" rx="3" fill="#7c3aed"/>
+  <text x="1012" y="458" class="t">Cost worker</text>
+  <text x="1012" y="480" class="tag" fill="#7c3aed">CPU</text>
+  <text x="1012" y="504" class="s">colour clustering in Lab,</text>
+  <text x="1012" y="524" class="s">cheapest dye recipe within</text>
+  <text x="1012" y="544" class="s">ΔE2000 (Kubelka-Munk),</text>
+  <text x="1012" y="564" class="s">quote per fabric</text>
+
+  <!-- ComfyUI -->
+  <rect class="box" x="1260" y="160" width="150" height="150" rx="10"/>
+  <rect x="1260" y="160" width="6" height="150" rx="3" fill="#ea580c"/>
+  <text x="1280" y="193" class="t">ComfyUI</text>
+  <text x="1280" y="215" class="tag" fill="#ea580c">GPU</text>
+  <text x="1280" y="240" class="s">SDXL Lightning</text>
+  <text x="1280" y="260" class="s">IP-Adapter Plus</text>
+  <text x="1280" y="280" class="s">project LoRA</text>
+
+  <!-- Offline path -->
+  <rect class="box" x="40" y="615" width="210" height="85" rx="10" stroke-dasharray="5 4"/>
+  <text x="62" y="648" class="t">Trend batch job</text>
+  <text x="62" y="672" class="s">offline, scheduled</text>
+  <rect class="box" x="320" y="615" width="250" height="85" rx="10"/>
+  <rect x="320" y="615" width="6" height="85" rx="3" fill="#0d9488"/>
+  <text x="342" y="648" class="t">Keyword store</text>
+  <text x="342" y="672" class="s">versioned JSON, atomic swap</text>
+
+  <!-- Edges -->
+  <path class="e" d="M250 360 H316" marker-end="url(#a)"/>
+  <text x="258" y="350" class="l">HTTP</text>
+
+  <path class="e" d="M570 300 H610 V207 H646" marker-end="url(#a)"/>
+  <text x="618" y="292" class="l">enqueue,</text>
+  <text x="618" y="308" class="l">status</text>
+
+  <path class="e" d="M570 420 H610 V512 H646" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="618" y="436" class="l">uploads,</text>
+  <text x="618" y="452" class="l">images</text>
+
+  <path class="e" d="M894 207 H966" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="900" y="196" class="l">claim, lease,</text>
+  <text x="900" y="232" class="l">complete</text>
+
+  <path class="e" d="M894 512 H966" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="900" y="501" class="l">read inputs,</text>
+  <text x="900" y="537" class="l">write outputs</text>
+
+  <path class="e" d="M1200 235 H1256" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="1206" y="222" class="l">graph,</text>
+  <text x="1206" y="257" class="l">progress</text>
+
+  <path class="e" d="M250 657 H316" marker-end="url(#a)"/>
+  <path class="d" d="M445 615 V479" marker-end="url(#a)"/>
+  <text x="453" y="560" class="l">prompt keywords</text>
+</svg>

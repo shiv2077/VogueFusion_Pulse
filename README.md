@@ -1,213 +1,183 @@
 # VogueFusion
 
-## Introduction
-
-**Brief overview of the project.**
-
-- **Purpose:** VogueFusion is a revolutionary tool designed to integrate fast-fashion design methodologies into the production workflows of traditional fashion brands. It leverages advanced AI models to streamline processes, enabling faster design iterations and reducing the time to market.
-- **Problem it solves:** Tackles inefficiencies in the design-to-production workflow, such as lengthy sampling times, lack of transparency, and delayed feedback.
-- **High-level benefits:**
-  - Enables automated design generation based on user inputs like fabric type, style, and market trends.
-  - Enhances decision-making by offering instant feedback and seamless image transformations.
-  - Bridges creativity and manufacturing practicality with accurate color formulations.
-
----
-
-## Features
-
-1. **AI-Driven Design Workflow Generation:**
-
-   - Uses **ComfyUI** with generative AI models like **DreamShaperXL**, based on the original SDXL model, to create workflows for rapid design generation.
-   - Automates the design process by analyzing fabric choices, styles, and keywords to produce designs aligned with the latest market trends.
-   - Reduces design time significantly, enabling quicker adaptation to fast-fashion trends.
-
-2. **Cost Prediction for Designs:**
-
-   - Analyzes generated designs to calculate the production cost efficiently.
-   - Classifies colors in the design based on their frequency of use, prioritizing the most-used colors.
-   - Extracts RGB values of dominant colors and determines optimal dye combinations using a **genetic algorithm**. The algorithm evaluates multiple combinations iteratively to find the most cost-effective dye mix.
-   - Matches the selected dye combinations with their respective prices in the dye cost dataset.
-   - Aggregates the costs of the individual dyes to calculate the total price required for printing the clothing article, enabling accurate cost prediction.
-
-3. **Trend Analysis:**
-
-   - Utilizes a custom dataset generated using the **Pinscrape API**, which includes 200 clothing images per season (Winter, Fall, Summer, etc.) over five years (2020–2024).
-   - Extracts at least five keywords per clothing image to represent dominant design elements.
-   - Applies keyword clustering techniques to:
-     - Identify which designs are currently trending, which were popular in the past, and which might become future trends.
-     - Analyze trends based on seasonal variations, identifying patterns like which types of clothing are in vogue during specific seasons.
-   - Provides actionable insights into market trends, helping brands align their designs with both current and future fashion preferences.
-
----
-
-## Model Architectures
-
-### Stable Diffusion XL (SDXL)
-
-**Overview:**
-
-Stable Diffusion XL (SDXL) is a powerful text-to-image generative model that extends the capabilities of the original Stable Diffusion framework. It is optimized for high-quality, high-resolution image synthesis, making it particularly effective in applications requiring fine detail and nuanced color reproduction, such as fashion design.
-
-**Key Features:**
-
-1. **Enhanced Architecture:**
-
-   - SDXL incorporates advanced multi-scale attention mechanisms that enable it to focus on both global structures and intricate details simultaneously.
-   - Includes improved latent diffusion models that ensure realistic and coherent outputs even for complex prompts.
-
-2. **High-Resolution Outputs:**
-
-   - Trained on a diverse and extensive dataset, SDXL generates outputs at resolutions up to 1024x1024, suitable for detailed garment designs.
-
-3. **Customizability:**
-
-   - Supports fine-tuning and control through embeddings, enabling designers to specify style, color palette, and texture preferences.
-
-**Workflow in VogueFusion:**
-
-- **Input:** Fabric type, style preferences, keywords, and market trends.
-- **Processing:**
-  - SDXL leverages its text-to-image pipeline to translate input prompts into high-resolution fashion designs.
-  - Utilizes pretrained models and fine-tuned LoRAs (Low-Rank Adaptations) for domain-specific outputs.
-- **Output:** Rapidly generated, market-aligned designs with a high degree of detail and color accuracy.
-
----
-
-## Video Demonstration
-
-https://github.com/user-attachments/assets/10fd9ecd-1782-43ba-8745-251c94a3c379
-
----
-
-## Tasks
-
-### Task 1: Design Generation
-
-**Objective:**
-Generate high-quality fashion designs based on simple user inputs.
-
-**Approach:**
-
-1. **Data Preparation:** Curated datasets of fabric patterns, styles, and colors.
-2. **Model Training:** Trained SDXL with domain-specific adaptations for high-resolution fashion design images.
-3. **Output:** Customizable designs tailored to user specifications.
-
-**Design Demonstration:**
-
-
-**ComfyUI Workflow:**
-
-<img src="assets/images/workflow.png" width=1500 height=600>
-
-**Frontend**
-
-
-<img src="assets/images/frontend.png" width=1500 height=600>
-
-<img src="assets/images/frontend_2.png" width=1500 height=600>
-
-**LORA**
-
-
-<img src="assets/images/lora.png" width=1500 height=600>
-<img src="assets/images/lora_details.png" width=900 height=600>
-
-**Generated sample**
-
-<img src="https://github.com/user-attachments/assets/58296b71-95d4-441d-bcc9-d6c6d5c4792d" width=300 height=500>
-
----
-
-### Task 2: Cost Prediction
-
-**Objective:**
-Accurately predict the production cost of generated designs.
-
-**Approach:**
-
-- Analyze the image to classify colors based on usage frequency.
-- Extract RGB values of the dominant colors to identify dye combinations.
-- Use a **genetic algorithm** to optimize dye combinations from the existing dye dataset by iteratively evaluating and selecting cost-effective combinations.
-- Calculate the total production cost by matching dye combinations with their respective prices in the dataset.
-- Summarize the costs to determine the final price of printing the clothing article.
-
-**Cost Prediction Demonstration:**
-
-<img src="https://github.com/user-attachments/assets/47138ed0-2023-4906-b92f-96eb8926e480" width=1000 height=600>
-
-
-
-<img src="https://github.com/user-attachments/assets/eba33fbd-af4c-4a02-b054-ac4db9ed7b1d" width=1200 height=400>
-
-
----
-
-### Task 3: Trend Analysis
-
-**Objective:**
-Analyze market trends to inform design generation and production.
-
-**Approach:**
-
-- Generate a custom dataset using the **Pinscrape API** to scrape 200 clothing images per season (Winter, Fall, Summer, etc.) over five years (2020–2024).
-- Extract at least five keywords per image to represent prominent design elements.
-- Perform keyword clustering to:
-  - Identify trends over time, distinguishing between current, past, and potential future trends.
-  - Categorize designs by seasonal variations, showing which clothing types dominate in specific seasons.
-- Provide actionable insights into market trends, helping fashion brands align their designs with consumer preferences.
-
-
-
----
-
-## Datasets Used
-
-### 1. Saree Design Dataset
-
-- **Description:** A dataset of sarees used to train the AI design models.
-- **Features:** Annotated with attributes like fabric patterns, colors, and styles.
-- **Usage in Project:** Used to fine-tune a LoRA (Low-Rank Adaptation) model for predicting high-quality designs.
-
-### 2. Dye Cost Dataset
-
-- **Description:** Compiled through market analysis, containing dye prices from various vendors.
-- **Features:** Includes information on dye combinations, individual dye costs, and RGB value mappings.
-- **Usage in Project:** Used for cost prediction to calculate the price of generated designs based on their color composition.
-
-### 3. Pinterest Trend Dataset
-
-- **Description:** Scraped using the Pinscrape API, consisting of 200 clothing images per season (Winter, Fall, Summer, etc.) for five years (2020–2024).
-- **Features:** Categorized by season and trend indicators, with keywords extracted for clustering.
-- **Usage in Project:** Used to train the trend analysis feature to predict market preferences and future fashion trends.
-
----
-
-## Future Enhancements
-
-- Introduce a **3D design preview** to simulate how garments look on virtual models.
-- Integrate **audio input analysis** to allow designers to describe their ideas verbally.
-- Expand the dataset to include more diverse cultural styles and fabrics.
-- Optimize GAN models for faster training and inference.
-
----
-
-## Shortcomings
-
-- Limited availability of open-source fashion datasets.
-- High computational requirements for training advanced models.
-- Challenges in ensuring perfect alignment between generated designs and production requirements.
-
----
+VogueFusion generates saree and kurti print designs from reference prints
+and estimates the dye cost of printing them.
+
+A designer gives up to four reference prints and a prompt. SDXL with
+IP-Adapter, plus a LoRA fine-tuned on 82 saree prints, generates new designs
+in that style. Any design can then be costed: its dominant colours are
+extracted, each colour gets the cheapest dye recipe that matches it within a
+perceptual tolerance, and the dye cost is totalled for a piece of fabric.
+
+<img src="assets/images/workbench.jpg" alt="Generate view: four reference prints on the left, three generated saree designs on the right" width="900">
+
+## What it does
+
+- **Generate.** ComfyUI runs DreamShaper XL Lightning with IP-Adapter Plus
+  (4 reference slots). Workflow `v2` adds the project's LoRA (rank 32,
+  alpha 16). Every result records its seed, workflow hash and model hashes.
+- **Colors and dye recipes.** Pixels are clustered in CIE Lab. For each
+  colour, the solver finds the cheapest mix of up to 3 of the catalogue's
+  20 dyes whose Kubelka-Munk prediction is within CIEDE2000 2.0 of it, or
+  reports that no mix is.
+- **Cost.** Dye mass per colour from its recipe, its share of the design
+  and the fabric weight, priced from the supplier's list (INR per kg).
+- **Status.** Queue depth and latency percentiles, live.
+
+## System design
+
+![VogueFusion system design](docs/architecture.svg)
+
+- **Asynchronous jobs.** `POST /v1/designs` returns 202 and a job id; the
+  client polls. A generation takes 10 to 40 s and fills 5.65 of 6 GB of
+  VRAM, so it cannot be served inside an HTTP request or run two at a time.
+- **Durable queue with leases.** Jobs live in SQLite (WAL). A worker
+  claims a job with a lease and renews it on every progress event. If the
+  worker dies, the lease lapses and the job is retried; a worker that lost
+  its lease cannot overwrite the new owner's result.
+- **Backpressure.** Each job kind has a depth limit. Past it, submit
+  returns 429 with `Retry-After = ceil(depth × p50 service time / workers)`.
+- **No duplicate GPU work.** `Idempotency-Key` returns the original job on
+  a retry, and a request identical to a finished one is served from its
+  stored result.
+- **Content-addressed storage.** Images are stored under their SHA-256,
+  written to a temp file and renamed, so a crash never leaves a partial
+  file at a valid address.
+- **One worker pool per resource.** The GPU worker drives ComfyUI; the cost
+  worker runs on CPU. A slow generation never delays a quote.
+
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) has the request walkthrough,
+failure modes with the test for each, measured capacity, and what changes
+at 10x and 100x load. [`docs/DECISIONS.md`](docs/DECISIONS.md) has the
+decision records, including the alternatives rejected.
+
+## Measured performance
+
+RTX 3060 Laptop GPU (6 GB), 22 GB RAM.
+
+| | Time |
+|---|---|
+| One design, models loaded (v1 / v2 with LoRA) | 10.2 s / 12.3 s |
+| Same, under sustained load (the laptop GPU throttles) | about 12.5 s |
+| First design after ComfyUI starts | 40.8 s |
+| Three designs in one batch (v1) | 26.9 s |
+| Dye quote, 5 colours | about 3 s |
+| Queue wait p95, load test at 82% utilisation | 12.7 s |
+
+Methods and raw results: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#6-capacity).
+
+## Quick start
+
+Needs Linux, an NVIDIA GPU with 6 GB or more, conda, and about 11 GB of disk
+for models.
+
+```bash
+# Python environment for this repo
+conda create -n voguefusion python=3.11 && conda activate voguefusion
+pip install -r requirements.txt
+
+# ComfyUI, outside the repo, pinned
+conda create -n comfy python=3.12
+conda run -n comfy pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+git clone https://github.com/comfyanonymous/ComfyUI.git ~/ComfyUI && git -C ~/ComfyUI checkout 989d93d0
+conda run -n comfy pip install -r ~/ComfyUI/requirements.txt
+git clone https://github.com/cubiq/ComfyUI_IPAdapter_plus.git ~/ComfyUI/custom_nodes/ComfyUI_IPAdapter_plus
+git -C ~/ComfyUI/custom_nodes/ComfyUI_IPAdapter_plus checkout a0f451a
+
+# Models (about 10 GB), each checked against the SHA-256 in comfyui/models.json
+comfyui/download_models.sh
+
+# Prompt keyword store
+PYTHONPATH=src python scripts/build_trends.py
+```
+
+Run:
+
+```bash
+scripts/vf.sh start     # ComfyUI, API, GPU worker, cost worker
+scripts/vf.sh status
+scripts/vf.sh stop
+```
+
+Then open http://127.0.0.1:8000. Runtime data (job database, images, logs,
+measurements) goes to `$VOGUEFUSION_DATA`, default `~/voguefusion-data`.
+
+Verify everything:
+
+```bash
+scripts/verify.sh
+```
+
+This runs lint, the test suite (no GPU needed; ComfyUI is faked), a docs
+check and, when the stack is running, a replay of a committed design
+through ComfyUI, an end-to-end run through the API, and the whole web app
+flow in headless Chrome.
+
+## The app
+
+| Colors | Dye Recipes | Cost |
+|---|---|---|
+| <img src="assets/images/colors.jpg" alt="Colors view" width="290"> | <img src="assets/images/dye_optimization.jpg" alt="Dye Recipes view" width="290"> | <img src="assets/images/cost_prediction.jpg" alt="Cost view" width="290"> |
+
+The look follows the original 2024 Workbench.
+
+## API
+
+| Method | Path | |
+|---|---|---|
+| POST | `/v1/references` | Upload an image (PNG, JPEG, WebP); returns its SHA-256 |
+| POST | `/v1/designs` | Submit a generation: 202 + `Location`, 429 when the queue is full |
+| GET | `/v1/designs/{id}` | State, substate (`loading_model`, `sampling`, ...), result |
+| POST | `/v1/costs` | Submit a dye quote for an image |
+| GET | `/v1/costs/{id}` | The quote |
+| GET | `/v1/artifacts/{sha256}` | Image bytes, cacheable forever |
+| GET | `/v1/workflows`, `/v1/costing` | Workflow defaults; dye catalogue and fabric defaults |
+| GET | `/v1/suggestions`, `/v1/metrics`, `/healthz` | Prompt keywords, queue metrics, health |
+
+## Repository layout
+
+```
+src/voguefusion/   API, job store, blob store, workers, ComfyUI client, workflow binding, trends
+src/costing/       colour science, colour extraction, dye solver, quote
+ui/web/            the web app (HTML, CSS, JavaScript; no build step)
+comfyui/           workflow graphs, model manifest, downloader
+configs/           every tunable value
+scripts/           vf.sh, verify.sh, e2e, ui_check, replay, measure, build_trends, recover_workflows
+tests/             colour science, costing, services (with a fake ComfyUI)
+docs/              architecture, decision records, system design diagram
+dataset/           82 saree prints with captions (LoRA training set), 9 committed outputs
+trend_and_cost_prediction/   the original 2024 app, kept for reference; its data/ holds the
+                             dye catalogue and the supplier price list
+```
+
+## How the generation pipeline was recovered
+
+The original ComfyUI workflow was not in the repository. Every PNG ComfyUI
+writes embeds the graph and seed that produced it, so
+`scripts/recover_workflows.py` extracts the workflow from the committed
+outputs, and `scripts/replay.py` re-runs a committed output's exact graph
+and seed to check the rebuilt pipeline. The replay is the same design with
+slightly shifted motifs: mean per-pixel ΔE2000 of 13.8 to 14.7 against the
+original, versus 19.6 or more against the other committed outputs.
+
+## Known limitations
+
+- **Absolute dye costs are not reliable.** The catalogue's dye colours are
+  placeholders, and the depth at which a dye reaches its catalogue colour is
+  assumed (20 g per kg of fabric). A saree quotes at about INR 1 of dye.
+  Comparisons between designs are more meaningful than any single figure.
+  Fixing this needs dye swatches measured at a known depth.
+- **Mixing is a 3-channel approximation** of Kubelka-Munk, not spectral, so
+  it cannot predict metamerism.
+- **There is no trend signal.** The 2024 Pinterest scrape was never
+  analysed and its images are gone. The keyword store is built from the
+  LoRA training captions, which have no dates.
+- **One machine, one GPU, no authentication.** The design scales out
+  (Postgres queue, object store, one ComfyUI per GPU); only the
+  single-machine version is built. Everything binds to 127.0.0.1.
 
 ## Acknowledgements
 
-- Inspired by advancements in generative AI models, including:
-  - **Stable Diffusion XL:** [https://github.com/StabilityAI/stable-diffusion-xl](https://github.com/StabilityAI/stable-diffusion-xl)
-  - **Pinscrape API:** Used to scrape clothing images from Pinterest and create a custom dataset for trend analysis.
-  - **DeepFashion Dataset:** [https://github.com/switchablenorms/DeepFashion](https://github.com/switchablenorms/DeepFashion)
-- Research Papers:
-  - "SDXL: Improving Latent Diffusion Models for High-Resolution Image Synthesis"
-  - "An AI pipeline for garment price projection using computer vision"
-
-
-
+SDXL (Podell et al.), DreamShaper XL (Lykon), IP-Adapter (h94),
+ComfyUI and ComfyUI_IPAdapter_plus, CIEDE2000 test data from Sharma, Wu and
+Dalal (2005).
