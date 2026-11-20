@@ -1,127 +1,188 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 740" width="1440" height="740" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 910" width="1440" height="910" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif">
   <title>VogueFusion system design</title>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0 0 10 5 0 10z" fill="#475569"/>
+      <path d="M0 0 10 5 0 10z" fill="#8b949e"/>
+    </marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" fill="#58a6ff"/>
     </marker>
     <style>
-      .card { fill: #ffffff; stroke: #e2e8f0; }
-      .box { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.2; }
-      .group { fill: #f5f3ff; stroke: #c4b5fd; stroke-dasharray: 6 5; stroke-width: 1.2; }
-      .t { font-size: 17px; font-weight: 600; fill: #0f172a; }
-      .s { font-size: 13px; fill: #475569; }
-      .g { font-size: 13px; font-weight: 600; fill: #6d28d9; letter-spacing: .04em; }
-      .e { stroke: #475569; stroke-width: 1.6; fill: none; }
-      .d { stroke: #94a3b8; stroke-width: 1.6; fill: none; stroke-dasharray: 5 5; }
-      .l { font-size: 12.5px; fill: #334155; }
-      .tag { font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+      .box { fill: #161b22; stroke: #30363d; stroke-width: 1.2; }
+      .panel { fill: #0d1117; stroke: #30363d; stroke-width: 1.2; }
+      .t { font-size: 17px; font-weight: 600; fill: #e6edf3; }
+      .s { font-size: 13px; fill: #9da7b3; }
+      .h { font-size: 12px; font-weight: 700; letter-spacing: .07em; }
+      .e { stroke: #8b949e; stroke-width: 1.6; fill: none; }
+      .p { stroke: #58a6ff; stroke-width: 1.6; fill: none; stroke-dasharray: 6 5; }
+      .o { stroke: #6e7681; stroke-width: 1.4; fill: none; stroke-dasharray: 5 5; }
+      .l { font-size: 12.5px; fill: #c9d1d9; }
+      .n { fill: #1f6feb; }
+      .nt { font-size: 12px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+      .st { fill: #161b22; stroke: #30363d; }
+      .stt { font-size: 13px; fill: #e6edf3; text-anchor: middle; }
     </style>
   </defs>
 
-  <rect class="card" x="0.5" y="0.5" width="1439" height="739" rx="16"/>
-  <text x="40" y="52" font-size="22" font-weight="700" fill="#0f172a">VogueFusion: system design</text>
-  <text x="40" y="78" class="s">Asynchronous jobs: the API never blocks on the GPU. Workers lease jobs from a durable queue; images are stored by content hash.</text>
+  <rect x="0" y="0" width="1440" height="910" rx="14" fill="#0d1117"/>
+
+  <!-- Header -->
+  <text x="40" y="52" font-size="24" font-weight="700" fill="#e6edf3">VogueFusion: system design</text>
+  <text x="40" y="78" class="s">The API never waits on the GPU. Jobs go through a durable queue; workers hold leases; images are stored by content hash.</text>
+  <rect x="1010" y="26" width="390" height="58" rx="8" fill="#161b22" stroke="#d29922" stroke-width="1.2"/>
+  <text x="1026" y="50" class="l"><tspan font-weight="700" fill="#d29922">Bottleneck</tspan>  1 GPU · ~12 s per design under load</text>
+  <text x="1026" y="72" class="l"><tspan font-weight="700" fill="#d29922">Admission</tspan>  8 jobs max, then 429 + Retry-After</text>
+
+  <!-- Trust boundary -->
+  <rect x="580" y="112" width="835" height="485" rx="14" fill="#f0883e" fill-opacity="0.04" stroke="#f0883e" stroke-opacity="0.7" stroke-dasharray="7 6"/>
+  <text x="598" y="136" class="h" fill="#f0883e">INTERNAL · NOT REACHABLE FROM CLIENTS</text>
 
   <!-- Client -->
-  <rect class="box" x="40" y="285" width="210" height="150" rx="10"/>
-  <rect x="40" y="285" width="6" height="150" rx="3" fill="#2563eb"/>
-  <text x="62" y="318" class="t">Web app</text>
-  <text x="62" y="344" class="s">Generate · Colors</text>
-  <text x="62" y="364" class="s">Dye Recipes · Cost</text>
-  <text x="62" y="384" class="s">Status</text>
-  <text x="62" y="414" class="s">submits jobs, polls status</text>
+  <rect class="box" x="40" y="285" width="200" height="150" rx="10"/>
+  <rect x="40" y="285" width="5" height="150" rx="2.5" fill="#58a6ff"/>
+  <text x="60" y="318" class="t">Web app</text>
+  <text x="60" y="344" class="s">Generate · Colors</text>
+  <text x="60" y="364" class="s">Dye Recipes · Cost</text>
+  <text x="60" y="384" class="s">Status</text>
+  <text x="60" y="414" class="s">browser, API calls only</text>
 
   <!-- API -->
-  <rect class="box" x="320" y="245" width="250" height="230" rx="10"/>
-  <rect x="320" y="245" width="6" height="230" rx="3" fill="#2563eb"/>
-  <text x="342" y="278" class="t">API service</text>
-  <text x="342" y="300" class="s">stateless</text>
-  <text x="342" y="332" class="s">validates and normalises input</text>
-  <text x="342" y="354" class="s">idempotency keys, request dedupe</text>
-  <text x="342" y="376" class="s">backpressure: 429 + Retry-After</text>
-  <text x="342" y="398" class="s">job status and queue metrics</text>
-  <text x="342" y="420" class="s">serves the app and images</text>
+  <rect class="box" x="300" y="250" width="240" height="220" rx="10"/>
+  <rect x="300" y="250" width="5" height="220" rx="2.5" fill="#58a6ff"/>
+  <text x="320" y="283" class="t">API service</text>
+  <text x="320" y="304" class="s">stateless · the only entry point</text>
+  <text x="320" y="336" class="s">validate, normalise input</text>
+  <text x="320" y="358" class="s">idempotency keys, dedupe</text>
+  <text x="320" y="380" class="s">admission control (429)</text>
+  <text x="320" y="402" class="s">job status, metrics</text>
+  <text x="320" y="424" class="s">serves app and images</text>
 
   <!-- Job store -->
-  <rect class="box" x="650" y="150" width="240" height="115" rx="10"/>
-  <rect x="650" y="150" width="6" height="115" rx="3" fill="#0d9488"/>
-  <text x="672" y="183" class="t">Job store</text>
-  <text x="672" y="205" class="s">SQLite (WAL), durable queue</text>
-  <text x="672" y="227" class="s">states, leases, retries,</text>
-  <text x="672" y="249" class="s">fencing by lease owner</text>
+  <rect class="box" x="615" y="160" width="230" height="110" rx="10"/>
+  <rect x="615" y="160" width="5" height="110" rx="2.5" fill="#2dd4bf"/>
+  <text x="635" y="192" class="t">Job store</text>
+  <text x="635" y="214" class="s">SQLite (WAL), durable queue</text>
+  <text x="635" y="234" class="s">job state, leases, retries</text>
+  <text x="635" y="254" class="s">one table, one module</text>
 
   <!-- Blob store -->
-  <rect class="box" x="650" y="455" width="240" height="115" rx="10"/>
-  <rect x="650" y="455" width="6" height="115" rx="3" fill="#0d9488"/>
-  <text x="672" y="488" class="t">Blob store</text>
-  <text x="672" y="510" class="s">content-addressed (SHA-256)</text>
-  <text x="672" y="532" class="s">references, generated designs;</text>
-  <text x="672" y="554" class="s">atomic write-then-rename</text>
+  <rect class="box" x="615" y="425" width="230" height="110" rx="10"/>
+  <rect x="615" y="425" width="5" height="110" rx="2.5" fill="#2dd4bf"/>
+  <text x="635" y="457" class="t">Blob store</text>
+  <text x="635" y="479" class="s">content-addressed (SHA-256)</text>
+  <text x="635" y="499" class="s">write temp file, then rename</text>
+  <text x="635" y="519" class="s">references and designs</text>
 
   <!-- Workers -->
-  <rect class="group" x="970" y="120" width="250" height="480" rx="12"/>
-  <text x="988" y="146" class="g">WORKERS · ONE POOL PER RESOURCE</text>
-
-  <rect class="box" x="990" y="165" width="210" height="140" rx="10"/>
-  <rect x="990" y="165" width="6" height="140" rx="3" fill="#7c3aed"/>
-  <text x="1012" y="198" class="t">GPU worker</text>
-  <text x="1012" y="222" class="s">binds the request into</text>
-  <text x="1012" y="242" class="s">a saved workflow graph,</text>
-  <text x="1012" y="262" class="s">renews its lease on every</text>
-  <text x="1012" y="282" class="s">progress event</text>
-
-  <rect class="box" x="990" y="425" width="210" height="150" rx="10"/>
-  <rect x="990" y="425" width="6" height="150" rx="3" fill="#7c3aed"/>
-  <text x="1012" y="458" class="t">Cost worker</text>
-  <text x="1012" y="480" class="tag" fill="#7c3aed">CPU</text>
-  <text x="1012" y="504" class="s">colour clustering in Lab,</text>
-  <text x="1012" y="524" class="s">cheapest dye recipe within</text>
-  <text x="1012" y="544" class="s">ΔE2000 (Kubelka-Munk),</text>
-  <text x="1012" y="564" class="s">quote per fabric</text>
+  <rect x="905" y="150" width="275" height="400" rx="12" fill="#8957e5" fill-opacity="0.07" stroke="#8957e5" stroke-dasharray="6 5"/>
+  <text x="922" y="174" class="h" fill="#a371f7">WORKERS · ONE POOL PER RESOURCE</text>
+  <rect class="box" x="925" y="188" width="210" height="120" rx="10"/>
+  <rect x="925" y="188" width="5" height="120" rx="2.5" fill="#a371f7"/>
+  <text x="945" y="220" class="t">GPU worker</text>
+  <text x="945" y="243" class="s">binds request values into</text>
+  <text x="945" y="263" class="s">a saved workflow graph;</text>
+  <text x="945" y="283" class="s">one per GPU</text>
+  <rect class="box" x="925" y="400" width="210" height="130" rx="10"/>
+  <rect x="925" y="400" width="5" height="130" rx="2.5" fill="#a371f7"/>
+  <text x="945" y="432" class="t">Cost worker</text>
+  <text x="945" y="455" class="s">CPU only</text>
+  <text x="945" y="477" class="s">Lab colour clustering;</text>
+  <text x="945" y="497" class="s">cheapest dye recipe within</text>
+  <text x="945" y="517" class="s">ΔE2000 (Kubelka-Munk)</text>
 
   <!-- ComfyUI -->
-  <rect class="box" x="1260" y="160" width="150" height="150" rx="10"/>
-  <rect x="1260" y="160" width="6" height="150" rx="3" fill="#ea580c"/>
-  <text x="1280" y="193" class="t">ComfyUI</text>
-  <text x="1280" y="215" class="tag" fill="#ea580c">GPU</text>
-  <text x="1280" y="240" class="s">SDXL Lightning</text>
-  <text x="1280" y="260" class="s">IP-Adapter Plus</text>
-  <text x="1280" y="280" class="s">project LoRA</text>
+  <rect class="box" x="1215" y="175" width="180" height="150" rx="10"/>
+  <rect x="1215" y="175" width="5" height="150" rx="2.5" fill="#f0883e"/>
+  <text x="1235" y="207" class="t">ComfyUI</text>
+  <text x="1235" y="229" class="h" fill="#f0883e">GPU · LOOPBACK ONLY</text>
+  <text x="1235" y="254" class="s">SDXL Lightning</text>
+  <text x="1235" y="274" class="s">IP-Adapter Plus</text>
+  <text x="1235" y="294" class="s">project LoRA</text>
 
-  <!-- Offline path -->
-  <rect class="box" x="40" y="615" width="210" height="85" rx="10" stroke-dasharray="5 4"/>
-  <text x="62" y="648" class="t">Trend batch job</text>
-  <text x="62" y="672" class="s">offline, scheduled</text>
-  <rect class="box" x="320" y="615" width="250" height="85" rx="10"/>
-  <rect x="320" y="615" width="6" height="85" rx="3" fill="#0d9488"/>
-  <text x="342" y="648" class="t">Keyword store</text>
-  <text x="342" y="672" class="s">versioned JSON, atomic swap</text>
+  <!-- Offline keyword path -->
+  <rect class="box" x="40" y="515" width="200" height="62" rx="10" stroke-dasharray="5 4"/>
+  <text x="60" y="542" class="t">Trend batch job</text>
+  <text x="60" y="563" class="s">offline, scheduled</text>
+  <rect class="box" x="300" y="515" width="240" height="62" rx="10"/>
+  <text x="320" y="542" class="t">Keyword store</text>
+  <text x="320" y="563" class="s">versioned JSON, atomic swap</text>
+  <path class="o" d="M240 546 H296" marker-end="url(#a)"/>
+  <path class="o" d="M420 515 V474" marker-end="url(#a)"/>
 
-  <!-- Edges -->
-  <path class="e" d="M250 360 H316" marker-end="url(#a)"/>
-  <text x="258" y="350" class="l">HTTP</text>
+  <!-- 1 submit / 7 poll -->
+  <path class="e" d="M240 325 H296" marker-end="url(#a)"/>
+  <circle class="n" cx="268" cy="309" r="10"/><text class="nt" x="268" y="313">1</text>
+  <path class="p" d="M300 400 H244" marker-end="url(#b)"/>
+  <circle class="n" cx="272" cy="418" r="10"/><text class="nt" x="272" y="422">7</text>
 
-  <path class="e" d="M570 300 H610 V207 H646" marker-end="url(#a)"/>
-  <text x="618" y="292" class="l">enqueue,</text>
-  <text x="618" y="308" class="l">status</text>
+  <!-- 2 enqueue -->
+  <path class="e" d="M540 290 H580 V215 H611" marker-end="url(#a)"/>
+  <circle class="n" cx="580" cy="252" r="10"/><text class="nt" x="580" y="256">2</text>
 
-  <path class="e" d="M570 420 H610 V512 H646" marker-start="url(#a)" marker-end="url(#a)"/>
-  <text x="618" y="436" class="l">uploads,</text>
-  <text x="618" y="452" class="l">images</text>
+  <!-- API <-> blobs (uploads in, images out for step 7) -->
+  <path class="e" d="M540 430 H580 V480 H611" marker-start="url(#a)" marker-end="url(#a)"/>
 
-  <path class="e" d="M894 207 H966" marker-start="url(#a)" marker-end="url(#a)"/>
-  <text x="900" y="196" class="l">claim, lease,</text>
-  <text x="900" y="232" class="l">complete</text>
+  <!-- 3 claim, 6 complete -->
+  <path class="e" d="M845 195 H901" marker-end="url(#a)"/>
+  <circle class="n" cx="873" cy="180" r="10"/><text class="nt" x="873" y="184">3</text>
+  <path class="e" d="M905 240 H849" marker-end="url(#a)"/>
+  <circle class="n" cx="877" cy="256" r="10"/><text class="nt" x="877" y="260">6</text>
 
-  <path class="e" d="M894 512 H966" marker-start="url(#a)" marker-end="url(#a)"/>
-  <text x="900" y="501" class="l">read inputs,</text>
-  <text x="900" y="537" class="l">write outputs</text>
+  <!-- 5 images -->
+  <path class="e" d="M905 480 H849" marker-start="url(#a)" marker-end="url(#a)"/>
+  <circle class="n" cx="877" cy="464" r="10"/><text class="nt" x="877" y="468">5</text>
 
-  <path class="e" d="M1200 235 H1256" marker-start="url(#a)" marker-end="url(#a)"/>
-  <text x="1206" y="222" class="l">graph,</text>
-  <text x="1206" y="257" class="l">progress</text>
+  <!-- 4 ComfyUI -->
+  <path class="e" d="M1135 250 H1211" marker-start="url(#a)" marker-end="url(#a)"/>
+  <circle class="n" cx="1173" cy="234" r="10"/><text class="nt" x="1173" y="238">4</text>
 
-  <path class="e" d="M250 657 H316" marker-end="url(#a)"/>
-  <path class="d" d="M445 615 V479" marker-end="url(#a)"/>
-  <text x="453" y="560" class="l">prompt keywords</text>
+  <!-- Panel: request flow -->
+  <rect class="panel" x="40" y="625" width="560" height="255" rx="10"/>
+  <text x="60" y="655" class="h" fill="#58a6ff">GENERATE: REQUEST FLOW</text>
+  <g class="l">
+    <circle class="n" cx="70" cy="682" r="9"/><text class="nt" x="70" y="686">1</text>
+    <text x="90" y="687">Web app submits a design; gets 202 and a job id, or 429 when full</text>
+    <circle class="n" cx="70" cy="710" r="9"/><text class="nt" x="70" y="714">2</text>
+    <text x="90" y="715">API validates, dedupes on idempotency key and input hash, enqueues</text>
+    <circle class="n" cx="70" cy="738" r="9"/><text class="nt" x="70" y="742">3</text>
+    <text x="90" y="743">GPU worker claims the oldest job with a time-limited lease</text>
+    <circle class="n" cx="70" cy="766" r="9"/><text class="nt" x="70" y="770">4</text>
+    <text x="90" y="771">ComfyUI runs the graph; every progress event renews the lease</text>
+    <circle class="n" cx="70" cy="794" r="9"/><text class="nt" x="70" y="798">5</text>
+    <text x="90" y="799">Output images are stored under their SHA-256</text>
+    <circle class="n" cx="70" cy="822" r="9"/><text class="nt" x="70" y="826">6</text>
+    <text x="90" y="827">Job marked complete, accepted only from the current lease owner</text>
+    <circle class="n" cx="70" cy="850" r="9"/><text class="nt" x="70" y="854">7</text>
+    <text x="90" y="855">Web app polls status, then fetches the images by hash</text>
+  </g>
+
+  <!-- Panel: job lifecycle -->
+  <rect class="panel" x="620" y="625" width="420" height="255" rx="10"/>
+  <text x="640" y="655" class="h" fill="#2dd4bf">JOB LIFECYCLE</text>
+  <rect class="st" x="645" y="737" width="92" height="36" rx="18"/><text class="stt" x="691" y="760">queued</text>
+  <rect class="st" x="790" y="737" width="100" height="36" rx="18"/><text class="stt" x="840" y="760">running</text>
+  <rect class="st" x="935" y="680" width="94" height="36" rx="18" stroke="#3fb950"/><text class="stt" x="982" y="703">succeeded</text>
+  <rect class="st" x="935" y="737" width="94" height="36" rx="18" stroke="#d29922"/><text class="stt" x="982" y="760">failed</text>
+  <rect class="st" x="935" y="794" width="94" height="36" rx="18" stroke="#f85149"/><text class="stt" x="982" y="817">dead</text>
+  <path class="e" d="M737 755 H786" marker-end="url(#a)"/>
+  <text x="742" y="746" class="s" font-size="11.5">claim</text>
+  <path class="e" d="M890 748 L931 702" marker-end="url(#a)"/>
+  <path class="e" d="M890 755 H931" marker-end="url(#a)"/>
+  <path class="e" d="M890 762 L931 808" marker-end="url(#a)"/>
+  <path class="e" d="M840 773 C840 830 691 830 691 777" marker-end="url(#a)"/>
+  <text x="694" y="848" class="s" font-size="11.5">retry with backoff, or lease expired</text>
+  <text x="640" y="690" class="s" font-size="11.5">failed: bad input, not retried</text>
+  <text x="640" y="708" class="s" font-size="11.5">dead: out of attempts</text>
+
+  <!-- Panel: observability -->
+  <rect class="panel" x="1060" y="625" width="340" height="255" rx="10"/>
+  <text x="1080" y="655" class="h" fill="#a371f7">OBSERVABILITY</text>
+  <text x="1080" y="688" class="l">Queue metrics</text>
+  <text x="1080" y="708" class="s">depth, oldest job, p50 / p95 of</text>
+  <text x="1080" y="726" class="s">queue wait, service, end to end</text>
+  <text x="1080" y="758" class="l">Job substates</text>
+  <text x="1080" y="778" class="s">loading_model, sampling, ...</text>
+  <text x="1080" y="810" class="l">Logs and health</text>
+  <text x="1080" y="830" class="s">JSON lines keyed by job id;</text>
+  <text x="1080" y="848" class="s">health of database and ComfyUI</text>
 </svg>
